@@ -7,17 +7,12 @@ import {
   Badge,
   Button,
   ListGroupItem,
-  InputGroupText,
-  InputGroup,
   Input,
 } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faTrash,
-  faCheckCircle,
-  faFilter,
-} from "@fortawesome/free-solid-svg-icons";
+import { faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { TASK_ENUM, TASK_STATUSES } from "../constant/enums";
+import style from "./task.module.css";
 
 const TaskItem = memo(({ task, updateTaskStatus, deleteTask }) => {
   const getStatusColor = () => {
@@ -33,39 +28,32 @@ const TaskItem = memo(({ task, updateTaskStatus, deleteTask }) => {
     }
   };
 
-  const getNextStatus = () => {
-    switch (task.status) {
-      case TASK_ENUM.TO_DO:
-        return TASK_ENUM.IN_PROGRESS;
-      case TASK_ENUM.IN_PROGRESS:
-        return TASK_ENUM.COMPLETED;
-      case TASK_ENUM.COMPLETED:
-        return TASK_ENUM.TO_DO;
-      default:
-        return TASK_ENUM.TO_DO;
-    }
-  };
-
   return (
     <ListGroupItem className="d-flex justify-content-between align-items-center">
       <div style={{ maxWidth: 250 }}>
+        <h5 className="d-flex">
+          <Badge color={getStatusColor()} className="text-start">
+            {task.status}
+          </Badge>
+        </h5>
+
         <h5 className="mb-1 text-start">{task.title}</h5>
         {task.description && (
           <p className="text-muted text-start small mb-1">{task.description}</p>
         )}
-        <Badge color={getStatusColor()} pill className="text-start">
-          {task.status}
-        </Badge>
       </div>
-      <div>
-        <Button
-          color="success"
-          size="sm"
-          className="me-2"
-          onClick={() => updateTaskStatus(task._id, getNextStatus())}
+      <div className="d-flex gap-3">
+        <Input
+          type="select"
+          value={task.status}
+          onChange={(e) => updateTaskStatus(task._id, e.target.value)}
         >
-          <FontAwesomeIcon icon={faCheckCircle} />
-        </Button>
+          {TASK_STATUSES.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </Input>
         <Button color="danger" size="sm" onClick={() => deleteTask(task._id)}>
           <FontAwesomeIcon icon={faTrash} />
         </Button>
@@ -80,76 +68,53 @@ const TaskList = ({
   deleteTask,
   filter,
   setFilter,
+  setModal
 }) => {
-  if (tasks.length === 0) {
-    return (
-      <Card>
-        <CardBody className="border-top">
-          <CardTitle tag="h4" className="text-center mb-3">
-            <FontAwesomeIcon icon={faFilter} className="me-2" />
-            Filter Tasks
-          </CardTitle>
-          <InputGroup>
-            <InputGroupText>Show</InputGroupText>
-            <Input
-              type="select"
-              value={filter}
-              onChange={(e) => setFilter(e.target.value)}
-            >
-              <option value="All">All Tasks</option>
-              {TASK_STATUSES.map((s) => (
-                <option key={s} value={s}>
-                  {s} Tasks
-                </option>
-              ))}
-            </Input>
-          </InputGroup>
-        </CardBody>
-        <CardBody className="text-center">
-          <h4>No Tasks Found</h4>
-          <p>Create a new task to get started!</p>
-        </CardBody>
-      </Card>
-    );
-  }
-
   return (
-    <Card>
-      <CardBody className="border-top">
-        <CardTitle tag="h4" className="text-center mb-3">
-          <FontAwesomeIcon icon={faFilter} className="me-2" />
-          Filter Tasks
-        </CardTitle>
-        <InputGroup>
-          <InputGroupText>Show</InputGroupText>
+    <Card className={style.taskCard}>
+      <CardBody className="">
+        <div className={style.task_card_hearder}>
+          <Button color="primary" onClick={() => setModal(true)}>
+            <FontAwesomeIcon icon={faPlus} />
+          </Button>
+
           <Input
             type="select"
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
+            style={{ maxWidth: 130 }}
           >
             <option value="All">All Tasks</option>
             {TASK_STATUSES.map((s) => (
               <option key={s} value={s}>
-                {s} Tasks
+                {s}
               </option>
             ))}
           </Input>
-        </InputGroup>
-      </CardBody>
-      <CardBody>
-        <CardTitle tag="h3" className="text-center mb-4">
-          Task List
-        </CardTitle>
-        <ListGroup>
-          {tasks.map((task) => (
-            <TaskItem
-              key={task._id}
-              task={task}
-              updateTaskStatus={updateTaskStatus}
-              deleteTask={deleteTask}
-            />
-          ))}
-        </ListGroup>
+        </div>
+
+        {tasks.length === 0 ? (
+          <div className="text-center">
+            <h4>No Tasks Found</h4>
+            <p>Create a new task to get started!</p>
+          </div>
+        ) : (
+          <>
+            <CardTitle tag="h3" className="text-center mb-4">
+              Task List
+            </CardTitle>
+            <ListGroup>
+              {tasks.map((task) => (
+                <TaskItem
+                  key={task._id}
+                  task={task}
+                  updateTaskStatus={updateTaskStatus}
+                  deleteTask={deleteTask}
+                />
+              ))}
+            </ListGroup>
+          </>
+        )}
       </CardBody>
     </Card>
   );

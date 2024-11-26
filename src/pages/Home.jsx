@@ -15,10 +15,7 @@ const Home = () => {
   const [filter, setFilter] = useState("All");
   const [modal, setModal] = useState(false);
 
-  // Load tasks from localStorage on initial render
   useEffect(() => {
-    const savedTasks = JSON.parse(localStorage.getItem("tasks") || "[]");
-    setTasks(savedTasks);
     fetchTask();
   }, []);
 
@@ -81,20 +78,17 @@ const Home = () => {
 
   return (
     <>
-      <Container>
-        <Row>
-          <Button onClick={() => setModal(!modal)}>Add Task</Button>
-          <Col>
-            <TaskList
-              tasks={getFilteredTasks()}
-              updateTaskStatus={updateTaskStatus}
-              deleteTask={deleteTask}
-              filter={filter}
-              setFilter={setFilter}
-            />
-          </Col>
-        </Row>
-        <TaskFormModal isOpen={modal} addTask={addTask} />
+      <Container className="page">
+        <TaskList
+          tasks={getFilteredTasks()}
+          updateTaskStatus={updateTaskStatus}
+          deleteTask={deleteTask}
+          filter={filter}
+          setFilter={setFilter}
+          setModal={setModal}
+        />
+
+        <TaskFormModal isOpen={modal} addTask={addTask} setModal={setModal} />
       </Container>
     </>
   );

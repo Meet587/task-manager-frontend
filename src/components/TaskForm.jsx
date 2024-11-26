@@ -5,19 +5,18 @@ import {
   Label,
   Input,
   Button,
-  Card,
-  CardBody,
-  CardTitle,
   FormFeedback,
   Modal,
   Col,
+  ModalHeader,
+  ModalBody,
 } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faPlus } from "@fortawesome/free-solid-svg-icons";
 import { TASK_STATUSES } from "../constant/enums";
 
-const TaskForm = ({ addTask }) => {
-
+const TaskForm = ({ addTask, isOpen }) => {
+  const [errors, setErrors] = useState({});
   const [fields, setFields] = useState({
     title: "",
     description: "",
@@ -35,7 +34,7 @@ const TaskForm = ({ addTask }) => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!fields.title.trim()) return;
+    if (!validateTaskData()) return;
 
     const newTask = {
       title: fields.title.trim(),
@@ -52,83 +51,107 @@ const TaskForm = ({ addTask }) => {
     });
   };
 
+  const validateTaskData = useCallback(
+    (e) => {
+      let isvalid = false;
+      let error = { ...errors };
+
+      if (fields.title === "") {
+        isvalid = false;
+        error["title"] = "Task Title should not be empty.";
+      } else {
+        isvalid = true;
+        error["title"] = null;
+      }
+
+      if (!Object.values(error).every((err) => err === null)) {
+        isvalid = false;
+      }
+      setErrors(error);
+      return isvalid;
+    },
+    [fields.title, isOpen]
+  );
+ 
   return (
-    <Card className="">
-      <CardBody>
-        <CardTitle tag="h3" className="text-center mb-4">
-          Create New Task
-        </CardTitle>
-        <Form onSubmit={handleSubmit} noValidate>
-          <FormGroup row>
-            <Label htmlFor="title" sm={3}>
-              Title
-            </Label>
-            <Col sm={9}>
-              <Input
-                type="text"
-                name="title"
-                id="title"
-                value={fields.title}
-                onChange={handleChange}
-                placeholder="Enter task title"
-              />
-            </Col>
-            <FormFeedback>Title is required</FormFeedback>
-          </FormGroup>
+    <Form onSubmit={handleSubmit} noValidate>
+      <FormGroup row>
+        <Label htmlFor="title" sm={3}>
+          Title
+        </Label>
+        <Col sm={9}>
+          <Input
+            type="text"
+            name="title"
+            id="title"
+            value={fields.title}
+            onChange={handleChange}
+            placeholder="Enter task title"
+            invalid={errors["title"] ? true : false}
+          />
+          {errors["title"] ? (
+            <FormFeedback type="invalid" className="error flex-start">
+              {errors["title"]}
+            </FormFeedback>
+          ) : null}
+        </Col>
+      </FormGroup>
 
-          <FormGroup row>
-            <Label htmlFor="description" sm={3}>
-              Description
-            </Label>
-            <Col sm={9}>
-              <Input
-                id="description"
-                name="description"
-                type="textarea"
-                value={fields.description}
-                onChange={handleChange}
-                placeholder="Optional task description"
-                rows={3}
-              />
-            </Col>
-          </FormGroup>
+      <FormGroup row>
+        <Label htmlFor="description" sm={3}>
+          Description
+        </Label>
+        <Col sm={9}>
+          <Input
+            id="description"
+            name="description"
+            type="textarea"
+            value={fields.description}
+            onChange={handleChange}
+            placeholder="Optional task description"
+            rows={3}
+          />
+        </Col>
+      </FormGroup>
 
-          <FormGroup row>
-            <Label htmlFor="status" sm={3}>
-              Status
-            </Label>
-            <Col sm={9}>
-              <Input
-                type="select"
-                name="status"
-                id="status"
-                value={fields.status}
-                onChange={handleChange}
-              >
-                {TASK_STATUSES.map((s) => (
-                  <option key={s} value={s}>
-                    {s}
-                  </option>
-                ))}
-              </Input>
-            </Col>
-          </FormGroup>
+      <FormGroup row>
+        <Label htmlFor="status" sm={3}>
+          Status
+        </Label>
+        <Col sm={9}>
+          <Input
+            type="select"
+            name="status"
+            id="status"
+            value={fields.status}
+            onChange={handleChange}
+          >
+            {TASK_STATUSES.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </Input>
+        </Col>
+      </FormGroup>
 
-          <Button color="primary" block type="submit" className="mt-3">
-            <FontAwesomeIcon icon={faPlus} className="me-2" />
-            Add Task
-          </Button>
-        </Form>
-      </CardBody>
-    </Card>
+      <Button color="primary" block type="submit" className="mt-3">
+        <FontAwesomeIcon icon={faPlus} className="me-2" />
+        Add Task
+      </Button>
+    </Form>
   );
 };
 
-const TaskFormModal = ({ isOpen, addTask }) => {
+const TaskFormModal = ({ isOpen, addTask, setModal }) => {
   return (
     <>
       <Modal isOpen={isOpen}>
-        <TaskForm addTask={addTask} />
+        <ModalHeader toggle={() => setModal(!isOpen)}></ModalHeader>
+        <ModalBody>
+          <h3 className="text-center mb-4">Create New Task</h3>
+          <TaskForm addTask={addTask} isOpen={isOpen} />
+        </ModalBody>
       </Modal>
     </>
   );

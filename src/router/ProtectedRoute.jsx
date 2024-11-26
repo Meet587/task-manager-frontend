@@ -9,11 +9,11 @@ export const ProtectedRoute = () => {
   }
 
   return (
-    <div>
+    <>
       <NavHeader />
       <main>
         <Outlet />
       </main>
-    </div>
+    </>
   );
 };

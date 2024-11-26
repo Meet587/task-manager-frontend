@@ -1,0 +1,7 @@
+.taskCard{
+    /* width: 300px; */
+}
+.task_card_hearder{
+    display: flex;
+    justify-content: space-between;
+}

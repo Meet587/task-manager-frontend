@@ -4,11 +4,9 @@ import NavHeader from "./Navbar";
 
 const Layout = () => {
   return (
-    <div>
-      <main>
-        <Outlet />
-      </main>
-    </div>
+    <>
+      <Outlet />
+    </>
   );
 };
 

@@ -2,19 +2,20 @@ import React, { memo } from "react";
 import {
   Card,
   CardBody,
-  CardTitle,
   ListGroup,
   Badge,
   Button,
   ListGroupItem,
   Input,
+  Col,
+  Row,
 } from "reactstrap";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faTrash, faPlus } from "@fortawesome/free-solid-svg-icons";
 import { TASK_ENUM, TASK_STATUSES } from "../constant/enums";
 import style from "./task.module.css";
 
-const TaskItem = memo(({ task, updateTaskStatus, deleteTask }) => {
+const TaskCard = memo(({ task, updateTaskStatus, deleteTask }) => {
   const getStatusColor = () => {
     switch (task.status) {
       case TASK_ENUM.TO_DO:
@@ -29,35 +30,50 @@ const TaskItem = memo(({ task, updateTaskStatus, deleteTask }) => {
   };
 
   return (
-    <ListGroupItem className="d-flex justify-content-between align-items-center">
-      <div style={{ maxWidth: 250 }}>
-        <h5 className="d-flex">
-          <Badge color={getStatusColor()} className="text-start">
-            {task.status}
-          </Badge>
-        </h5>
-
+    <ListGroupItem className="rounded my-1">
+      <Row>
+        <Col>
+          <span className="d-flex">
+            <Badge pill color={getStatusColor()}>
+              {task.status}
+            </Badge>
+          </span>
+        </Col>
+        <Col>
+          <div className="d-flex justify-content-end gap-3">
+            <Input
+              style={{ maxWidth: 130 }}
+              type="select"
+              value={task.status}
+              onChange={(e) => updateTaskStatus(task._id, e.target.value)}
+            >
+              {TASK_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </Input>
+            <Button
+              color="danger"
+              size="sm"
+              onClick={() => deleteTask(task._id)}
+            >
+              <FontAwesomeIcon icon={faTrash} />
+            </Button>
+          </div>
+        </Col>
+      </Row>
+      <Row>
         <h5 className="mb-1 text-start">{task.title}</h5>
         {task.description && (
-          <p className="text-muted text-start small mb-1">{task.description}</p>
+          <p
+            className="text-muted text-start small mb-1"
+            style={{ minWidth: 150, maxWidth: "70%" }}
+          >
+            {task.description}
+          </p>
         )}
-      </div>
-      <div className="d-flex gap-3">
-        <Input
-          type="select"
-          value={task.status}
-          onChange={(e) => updateTaskStatus(task._id, e.target.value)}
-        >
-          {TASK_STATUSES.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </Input>
-        <Button color="danger" size="sm" onClick={() => deleteTask(task._id)}>
-          <FontAwesomeIcon icon={faTrash} />
-        </Button>
-      </div>
+      </Row>
     </ListGroupItem>
   );
 });
@@ -67,17 +83,18 @@ const TaskList = ({
   updateTaskStatus,
   deleteTask,
   filter,
+  setModal,
   setFilter,
-  setModal
 }) => {
   return (
     <Card className={style.taskCard}>
       <CardBody className="">
-        <div className={style.task_card_hearder}>
+        <div
+          className={`${style.task_card_hearder} style.task_card_hearder} mb-4`}
+        >
           <Button color="primary" onClick={() => setModal(true)}>
             <FontAwesomeIcon icon={faPlus} />
           </Button>
-
           <Input
             type="select"
             value={filter}
@@ -100,18 +117,18 @@ const TaskList = ({
           </div>
         ) : (
           <>
-            <CardTitle tag="h3" className="text-center mb-4">
-              Task List
-            </CardTitle>
             <ListGroup>
-              {tasks.map((task) => (
-                <TaskItem
-                  key={task._id}
-                  task={task}
-                  updateTaskStatus={updateTaskStatus}
-                  deleteTask={deleteTask}
-                />
-              ))}
+              <Row>
+                {tasks.map((task) => (
+                  <Col md={12} key={task._id}>
+                    <TaskCard
+                      task={task}
+                      updateTaskStatus={updateTaskStatus}
+                      deleteTask={deleteTask}
+                    />
+                  </Col>
+                ))}
+              </Row>
             </ListGroup>
           </>
         )}

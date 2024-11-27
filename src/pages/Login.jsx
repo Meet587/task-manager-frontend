@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react";
-import { Link, useNavigate } from "react-router";
+import React, { useCallback, useEffect, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router";
 import {
   Button,
   Card,
@@ -11,20 +11,32 @@ import {
   FormFeedback,
   FormGroup,
   Input,
+  InputGroup,
+  InputGroupText,
   Label,
 } from "reactstrap";
 import { axiosAuth } from "./../utils/apihelper";
 import { EMAIL_REGEX } from "../constant/regx";
 import { toast } from "react-toastify";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 const Login = () => {
   const navigate = useNavigate();
-  const [isPassVisible, setIsPassVisible] = useState(false);
+  const localtion = useLocation();
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState(false);
   const [fields, setFields] = useState({
     email: "",
     password: "",
   });
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) navigate("/home");
+  }, [localtion.pathname]);
+
   const handleChange = useCallback(
     (e) => {
       const { name, value } = e.target;
@@ -68,6 +80,7 @@ const Login = () => {
       e.preventDefault();
       try {
         if (!validateInputData()) return null;
+        setLoading(true);
         const res = await axiosAuth("/auth/login", {
           email: fields.email,
           password: fields.password,
@@ -86,60 +99,81 @@ const Login = () => {
       } catch (error) {
         toast.error(error?.message);
         console.log(error);
+      } finally {
+        setLoading(false);
       }
     },
     [fields]
   );
   return (
     <>
-      <Container>
-        <div>
-          <Card>
-            <CardHeader>Welcome Back !</CardHeader>
-            <CardBody>
-              <Form onSubmit={handleSubmit}>
-                <FormGroup floating>
-                  <Input
-                    id="email"
-                    name="email"
-                    placeholder="Enter your email."
-                    type="email"
-                    value={fields.email}
-                    onChange={handleChange}
-                    invalid={errors["email"] ? true : false}
-                  />
-                  <Label for="email">Email</Label>
-                  {errors["email"] ? (
-                    <FormFeedback type="invalid" className="error flex-start">
-                      {errors["email"]}
-                    </FormFeedback>
-                  ) : null}
-                </FormGroup>
-                <FormGroup floating>
+      <Container fluid className="mt-3 mt-md-5 pt-5">
+        <Card style={{ maxWidth: 300 }}>
+          <CardHeader>Welcome Back !</CardHeader>
+          <CardBody>
+            <Form onSubmit={handleSubmit}>
+              <FormGroup floating>
+                <Input
+                  id="email"
+                  name="email"
+                  placeholder="Enter your email."
+                  type="email"
+                  value={fields.email}
+                  onChange={handleChange}
+                  invalid={errors["email"] ? true : false}
+                  disabled={loading}
+                />
+                <Label for="email">Email</Label>
+                {errors["email"] ? (
+                  <FormFeedback type="invalid" className="error flex-start">
+                    {errors["email"]}
+                  </FormFeedback>
+                ) : null}
+              </FormGroup>
+              <FormGroup>
+                <InputGroup>
                   <Input
                     id="password"
                     name="password"
                     placeholder="Enter password."
-                    type="password"
+                    type={showPassword ? "text" : "password"}
                     value={fields.password}
                     onChange={handleChange}
                     invalid={errors["password"] ? true : false}
+                    disabled={loading}
                   />
-                  <Label for="password">Password</Label>
-                  {errors["password"] ? (
-                    <FormFeedback type="invalid" className="error">
-                      {errors["password"]}
-                    </FormFeedback>
-                  ) : null}
-                </FormGroup>
-                <Button>Login</Button>
-              </Form>
-            </CardBody>
-            <CardFooter>
-              Don't have an account <Link to={"/register"}>Go to register</Link>
-            </CardFooter>
-          </Card>
-        </div>
+                  <InputGroupText>
+                    <Button
+                      color="link"
+                      size="sm"
+                      onClick={() => setShowPassword(!showPassword)}
+                      disabled={loading}
+                      style={{ textDecoration: "none" }}
+                    >
+                      {showPassword ? (
+                        <FontAwesomeIcon icon={faEyeSlash} />
+                      ) : (
+                        <FontAwesomeIcon icon={faEye} />
+                      )}
+                    </Button>
+                  </InputGroupText>
+                </InputGroup>
+                <Label htmlFor="password" className="d-none"></Label>
+                {errors["password"] ? (
+                  <FormFeedback type="invalid" className="error">
+                    {errors["password"]}
+                  </FormFeedback>
+                ) : null}
+              </FormGroup>
+              <Button color="primary" className="w-50" disabled={loading}>
+                Login
+              </Button>
+            </Form>
+          </CardBody>
+          <CardFooter>
+            Don't have an account <Link to={"/register"}>Go to register</Link>
+          </CardFooter>
+        </Card>
       </Container>
     </>
   );

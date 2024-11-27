@@ -4,26 +4,17 @@ import {
   RouterProvider,
   Route,
   createRoutesFromElements,
+  Outlet,
 } from "react-router-dom";
 
-// Pages
-// import Home from "../pages/Home";
-// import About from "../pages/About";
-// import Login from "../pages/Login";
-// import Dashboard from "../pages/Dashboard";
-// import NotFound from "../pages/NotFound";
-
-// Components
-// import Layout from "../components/Layout";
 import { ProtectedRoute } from "./ProtectedRoute";
 import Login from "../pages/Login";
-import Layout from "../components/Layout";
 import Register from "../pages/Register";
 import Home from "../pages/Home";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route element={<Layout />}>
+    <Route element={<Outlet />}>
       {/* Public Routes */}
       <Route path="/register" element={<Register />} />
       <Route path="/" element={<Login />} />

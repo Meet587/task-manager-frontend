@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Container, Row, Col, Button } from "reactstrap";
+import { Container } from "reactstrap";
 import TaskList from "./../components/TaskList";
 import TaskFormModal from "./../components/TaskForm";
 import {
@@ -19,14 +19,11 @@ const Home = () => {
     fetchTask();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("tasks", JSON.stringify(tasks));
-  }, [tasks]);
-
   const fetchTask = async () => {
     try {
       const res = await axiosGet("/tasks/list");
       setTasks(res.data);
+      localStorage.setItem("allTask", JSON.stringify(res.data));
       return res;
     } catch (error) {
       toast.error(error?.message);
@@ -34,7 +31,6 @@ const Home = () => {
     }
   };
 
-  // Add new task
   const addTask = async (newTask) => {
     try {
       const res = await axiosPost("/tasks", newTask);
@@ -46,7 +42,6 @@ const Home = () => {
     setModal(false);
   };
 
-  // Update task status
   const updateTaskStatus = async (id, newStatus) => {
     try {
       const res = await axiosPatch(`/tasks/update-status/${id}`, {
@@ -59,7 +54,6 @@ const Home = () => {
     }
   };
 
-  // Delete task
   const deleteTask = async (id) => {
     try {
       const res = await axiosDelete(`/tasks/${id}`);
@@ -70,7 +64,6 @@ const Home = () => {
     }
   };
 
-  // Filter tasks
   const getFilteredTasks = () => {
     if (filter === "All") return tasks;
     return tasks.filter((task) => task.status === filter);
@@ -78,9 +71,10 @@ const Home = () => {
 
   return (
     <>
-      <Container className="page">
+      <Container fluid className="">
         <TaskList
           tasks={getFilteredTasks()}
+          getFilteredTasks={getFilteredTasks}
           updateTaskStatus={updateTaskStatus}
           deleteTask={deleteTask}
           filter={filter}

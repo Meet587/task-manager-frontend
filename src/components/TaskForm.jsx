@@ -72,7 +72,7 @@ const TaskForm = ({ addTask, isOpen }) => {
     },
     [fields.title, isOpen]
   );
- 
+
   return (
     <Form onSubmit={handleSubmit} noValidate>
       <FormGroup row>
@@ -147,9 +147,10 @@ const TaskFormModal = ({ isOpen, addTask, setModal }) => {
   return (
     <>
       <Modal isOpen={isOpen}>
-        <ModalHeader toggle={() => setModal(!isOpen)}></ModalHeader>
+        <ModalHeader toggle={() => setModal(!isOpen)}>
+          Create New Task
+        </ModalHeader>
         <ModalBody>
-          <h3 className="text-center mb-4">Create New Task</h3>
           <TaskForm addTask={addTask} isOpen={isOpen} />
         </ModalBody>
       </Modal>
